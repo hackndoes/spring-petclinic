@@ -7,5 +7,8 @@ ENV POSTGRES_URL jdbc:postgresql://postgres/petclinic
 ENV JAVA_OPTS "-Dspring.profiles.active=postgres -Xmx2g"
 EXPOSE 8080
 COPY target/*.jar /opt/app.jar
-ENV JAVA_TOOL_OPTIONS $CONTRAST_OPTS -Dcontrast.application.group=craft.petclinic
-ENTRYPOINT exec java $JAVA_OPTS -jar app.jar
+COPY --from=contrast/agent-java:latest /contrast/contrast-agent.jar /opt/contrast/contrast.jar
+COPY config/contrast_security.yaml /opt/contrast/contrast_security.yaml
+ENV JAVA_TOOL_OPTIONS "-javaagent:/opt/contrast/contrast.jar -Dcontrast.config.path=/opt/contrast/contrast_security.yaml"
+ENTRYPOINT exec java ${JAVA_OPTS} -jar app.jar
+
